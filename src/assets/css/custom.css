@@ -1,0 +1,130 @@
+/* Midlands Mutts Brown */
+/* #b26934 */
+
+.App {
+  background-color: #222;
+  color: whitesmoke;
+  font-family: "Montserrat", sans-serif;
+}
+
+input {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.bg-mm {
+  background-color: #b26934;
+}
+
+.form-control:focus {
+  border-color: transparent;
+}
+
+.title {
+  font-size: 5rem;
+  text-align: center;
+  font-weight: bold;
+  margin: 5px 0px 10px 0px;
+  font-family: "Protest Strike", sans-serif;
+  line-height: 100%;
+}
+
+.heading {
+  font-size: 2rem;
+  text-align: center;
+  font-family: "Protest Strike", sans-serif;
+}
+
+.protest-strike {
+  font-family: "Protest Strike", sans-serif;
+}
+
+.montserrat {
+  font-family: "Montserrat", sans-serif;
+}
+
+.pageContainer {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.navbar-brand .nav-link {
+  font-family: "Protest Strike", sans-serif;
+  font-size: xx-large;
+  margin-left: 10px;
+}
+
+.navbar-brand .btn:active {
+  border: none;
+}
+
+.navbar-brand .btn:focus {
+  border: none;
+}
+
+/* Remove spinner from number inputs */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  /* display: none; <- Crashes Chrome on hover */
+  -webkit-appearance: none;
+  margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}
+/* ******************************** */
+
+.underlined-hover:hover {
+  text-decoration: underline;
+}
+
+.underlined {
+  text-decoration: underline;
+}
+
+.remove-underline {
+  text-decoration: none;
+}
+
+.hoverable {
+  transition: box-shadow 0.3s;
+}
+.hoverable:hover,
+.dark-shadow {
+  box-shadow: 0 0 11px rgba(0, 0, 0, 0.75);
+}
+
+.mids-mutts-glow {
+  box-shadow: 0 0 11px #ffa50099;
+}
+
+/* Remove blue glow from buttons */
+textarea,
+input,
+.button:active,
+button:active,
+.button:focus,
+button:focus,
+.button:hover,
+button:hover {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.cookie-consent {
+  height: 100px;
+  position: fixed;
+  bottom: 0%;
+  width: 100%;
+  background-color: #222;
+  opacity: 1;
+}

@@ -1,0 +1,99 @@
+@import "../../../node_modules/bootstrap/scss/functions";
+
+$mids-mutts: #0082b4;
+$primary: #0082b4;
+$fore: #2a2a2a;
+$subtle: #888;
+$secondary: #3a3a3a;
+$background: #222;
+
+@import "../../../node_modules/bootstrap/scss/variables";
+@import "../../../node_modules/bootstrap/scss/variables-dark";
+
+$link-color: $light;
+$link-hover-color: $gray-400;
+
+$input-placeholder-color: $gray-600;
+$input-border-color: $gray-600;
+
+// merge with existing $theme-colors map
+$theme-colors: map-merge(
+  $theme-colors,
+  (
+    "fore": $fore,
+    "secondary": $secondary,
+    "primary": $primary,
+    "subtle": $subtle,
+    "background": $background,
+    "mids-mutts": $mids-mutts,
+  )
+);
+
+$display-font-sizes: map-merge(
+  $display-font-sizes,
+  (
+    7: 2rem,
+    8: 1.75rem,
+  )
+);
+
+@import "../../../node_modules/bootstrap/scss/mixins";
+@import "../../../node_modules/bootstrap/scss/maps";
+@import "../../../node_modules/bootstrap/scss/utilities";
+
+$form-select-indicator-color: $mids-mutts;
+
+$utilities: map-merge(
+  $utilities,
+  (
+    "width":
+      map-merge(
+        map-get($utilities, "width"),
+        (
+          responsive: true,
+        )
+      ),
+  )
+);
+
+// set changes
+@import "../../../node_modules/bootstrap/scss/root";
+@import "../../../node_modules/bootstrap/scss/reboot";
+@import "../../../node_modules/bootstrap/scss/bootstrap";
+
+.profile-pet-pic {
+  width: 30%;
+}
+@include media-breakpoint-up(md) {
+  .profile-pet-pic {
+    width: 100%;
+  }
+}
+
+.btn-outline-mids-mutts {
+  --bs-btn-hover-color: $light;
+}
+
+hr {
+  color: $light;
+}
+
+.standard-grid {
+  @extend .row;
+  @extend .row-gap-4;
+  @include row-cols(1);
+  @include media-breakpoint-up(sm) {
+    @include row-cols(2);
+  }
+  @include media-breakpoint-up(lg) {
+    @include row-cols(3);
+  }
+  @include media-breakpoint-up(xl) {
+    @include row-cols(4);
+  }
+}
+
+.nav-tabs .nav-link.active {
+  background-color: $fore;
+  border-bottom-color: transparent;
+}

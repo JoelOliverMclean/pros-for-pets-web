@@ -1,0 +1,172 @@
+/*------------------------------------
+- COLOR mids-mutts
+------------------------------------*/
+
+$mids_mutts_t1: #0082b4;
+$mids_mutts_t2: #005d81;
+$mids_mutts_t3: #53cfff;
+$mids_mutts_t4: #6cd6ff;
+$mids_mutts_t5: #002939;
+$mids_mutts_t6: #005271;
+$mids_mutts_t7: #006890;
+$mids_mutts_t8: #000406;
+$mids_mutts_t9: #81dcff;
+
+$mids_mutts_shadow: rgba(0, 130, 180, 0.5);
+$mids_mutts_text_color_dark_bright: #fff;
+
+.alert-mids-mutts {
+  color: $mids_mutts_t5;
+  background-color: $mids_mutts_t9;
+  border-color: $mids_mutts_t4;
+}
+
+.alert-mids-mutts hr {
+  border-top-color: $mids_mutts_t3;
+}
+
+.alert-mids-mutts .alert-link {
+  color: $mids_mutts_t8;
+}
+
+.badge-mids-mutts {
+  color: $mids_mutts_text_color_dark_bright;
+  background-color: $mids_mutts_t1;
+}
+
+.badge-mids-mutts[href]:hover,
+.badge-mids-mutts[href]:focus {
+  color: $mids_mutts_text_color_dark_bright;
+  background-color: $mids_mutts_t2;
+}
+
+.bg-mids-mutts {
+  background-color: $mids_mutts_t1 !important;
+}
+
+a.bg-mids-mutts:hover,
+a.bg-mids-mutts:focus,
+button.bg-mids-mutts:hover,
+button.bg-mids-mutts:focus {
+  background-color: $mids_mutts_t2 !important;
+}
+
+.border-mids-mutts {
+  border-color: $mids_mutts_t1 !important;
+}
+
+.btn-mids-mutts {
+  color: $mids_mutts_text_color_dark_bright;
+  background-color: $mids_mutts_t1;
+  border-color: $mids_mutts_t1;
+}
+
+.btn-mids-mutts:hover {
+  color: $mids_mutts_text_color_dark_bright;
+  background-color: $mids_mutts_t7;
+  border-color: $mids_mutts_t2;
+}
+
+.btn-mids-mutts:focus,
+.btn-mids-mutts.focus {
+  box-shadow: 0 0 0 0.2rem $mids_mutts_shadow;
+}
+
+.btn-mids-mutts.disabled,
+.btn-mids-mutts:disabled {
+  color: $mids_mutts_text_color_dark_bright;
+  background-color: $mids_mutts_t1;
+  border-color: $mids_mutts_t1;
+}
+
+.btn-mids-mutts:not(:disabled):not(.disabled):active,
+.btn-mids-mutts:not(:disabled):not(.disabled).active,
+.show > .btn-mids-mutts.dropdown-toggle {
+  color: $mids_mutts_text_color_dark_bright;
+  background-color: $mids_mutts_t2;
+  border-color: $mids_mutts_t6;
+}
+
+.btn-mids-mutts:not(:disabled):not(.disabled):active:focus,
+.btn-mids-mutts:not(:disabled):not(.disabled).active:focus,
+.show > .btn-mids-mutts.dropdown-toggle:focus {
+  box-shadow: 0 0 0 0.2rem $mids_mutts_shadow;
+}
+
+.btn-outline-mids-mutts {
+  color: $mids_mutts_t1;
+  background-color: transparent;
+  border-color: $mids_mutts_t1;
+}
+
+.btn-outline-mids-mutts:hover {
+  color: $mids_mutts_text_color_dark_bright;
+  background-color: $mids_mutts_t1;
+  border-color: $mids_mutts_t1;
+}
+
+.btn-outline-mids-mutts:focus,
+.btn-outline-mids-mutts.focus {
+  box-shadow: 0 0 0 0.2rem $mids_mutts_shadow;
+}
+
+.btn-outline-mids-mutts.disabled,
+.btn-outline-mids-mutts:disabled {
+  color: $mids_mutts_t1;
+  background-color: transparent;
+}
+
+.btn-outline-mids-mutts:not(:disabled):not(.disabled):active,
+.btn-outline-mids-mutts:not(:disabled):not(.disabled).active,
+.show > .btn-outline-mids-mutts.dropdown-toggle {
+  color: $mids_mutts_text_color_dark_bright;
+  background-color: $mids_mutts_t1;
+  border-color: $mids_mutts_t1;
+}
+
+.btn-outline-mids-mutts:not(:disabled):not(.disabled):active:focus,
+.btn-outline-mids-mutts:not(:disabled):not(.disabled).active:focus,
+.show > .btn-outline-mids-mutts.dropdown-toggle:focus {
+  box-shadow: 0 0 0 0.2rem $mids_mutts_shadow;
+}
+
+.list-group-item-mids-mutts {
+  color: $mids_mutts_t5;
+  background-color: $mids_mutts_t4;
+}
+
+.list-group-item-mids-mutts.list-group-item-action:hover,
+.list-group-item-mids-mutts.list-group-item-action:focus {
+  color: $mids_mutts_t5;
+  background-color: $mids_mutts_t3;
+}
+
+.list-group-item-mids-mutts.list-group-item-action.active {
+  color: $mids_mutts_text_color_dark_bright;
+  background-color: $mids_mutts_t5;
+  border-color: $mids_mutts_t5;
+}
+
+.table-mids-mutts,
+.table-mids-mutts > th,
+.table-mids-mutts > td {
+  background-color: $mids_mutts_t4;
+}
+
+.table-hover .table-mids-mutts:hover {
+  background-color: $mids_mutts_t3;
+}
+
+.table-hover .table-mids-mutts:hover > td,
+.table-hover .table-mids-mutts:hover > th {
+  background-color: $mids_mutts_t3;
+}
+
+.text-mids-mutts {
+  color: $mids_mutts_t1 !important;
+}
+
+a.text-mids-mutts:hover,
+a.text-mids-mutts:focus {
+  color: $mids_mutts_t2 !important;
+}
