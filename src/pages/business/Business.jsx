@@ -63,7 +63,7 @@ function Business() {
         }
       });
     },
-    [business, selectedBookingSlot, navigate]
+    [business, navigate]
   );
 
   const getBusiness = useCallback(() => {

@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import Card from "react-bootstrap/Card";
 import moment from "moment";
 
-function BookingCard({ booking, mine }) {
+function BookingCard({ booking, mine, reviewRequest }) {
   return (
     <Card className="h-100">
       <Card.Header>
@@ -50,6 +50,7 @@ function BookingCard({ booking, mine }) {
                   )}`
                 }
                 target="_blank"
+                rel="noreferrer"
               >
                 <i className="fa-solid fa-location-dot" title="location"></i>
                 {"  "}
@@ -69,8 +70,18 @@ function BookingCard({ booking, mine }) {
             </button>
           ) : (
             <Fragment>
-              <button className="btn btn-success flex-fill">Accept</button>
-              <button className="btn btn-outline-danger flex-fill">Deny</button>
+              <button
+                className="btn btn-success flex-fill"
+                onClick={() => reviewRequest(booking, true)}
+              >
+                Accept
+              </button>
+              <button
+                className="btn btn-outline-danger flex-fill"
+                onClick={() => reviewRequest(booking, false)}
+              >
+                Reject
+              </button>
             </Fragment>
           )}
         </Card.Footer>

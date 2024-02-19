@@ -9,6 +9,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { apiGet, apiPost } from "../../helpers/NetworkHelper";
 import { AuthContext } from "../../helpers/AuthContext";
 import { ClipLoader } from "react-spinners";
+import { toast } from "react-toastify";
 import Card from "react-bootstrap/Card";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
@@ -45,7 +46,6 @@ function ManageBusiness() {
             response.data.business.businessUsers.filter((bu) => !bu.confirmed)
           );
           setBookingRequests(response.data.bookingRequests);
-          console.log(response.data);
         }
       } else {
         navigate("/");
@@ -128,7 +128,7 @@ function ManageBusiness() {
     );
   };
 
-  const approve = (bu, approved) => {
+  const approveUser = (bu, approved) => {
     apiPost(`/manage-business/review-user/${bu._id}`, { approved }).then(
       (response) => {
         if (response.status === 200) {
@@ -154,13 +154,13 @@ function ManageBusiness() {
               <div className="d-flex gap-2">
                 <button
                   className="form-control btn btn-success"
-                  onClick={() => approve(bu, true)}
+                  onClick={() => approveUser(bu, true)}
                 >
                   Approve
                 </button>
                 <button
                   className="form-control btn btn-outline-danger"
-                  onClick={() => approve(bu, false)}
+                  onClick={() => approveUser(bu, false)}
                 >
                   Deny
                 </button>
@@ -222,12 +222,45 @@ function ManageBusiness() {
     </Fragment>
   );
 
+  const reviewRequest = useCallback(
+    (request, accepted) => {
+      apiPost("manage-booking-slots/review-request", {
+        booking_id: request._id,
+        accepted,
+      }).then((response) => {
+        if (response.status === 200) {
+          setBookingRequests({
+            ...bookingRequests.filter((br) => br === request),
+          });
+          toast.success(`Request ${accepted ? "accepted" : "rejected"}`, {
+            theme: "dark",
+            position: "top-center",
+            autoClose: 1000,
+            pauseOnFocusLoss: false,
+          });
+        } else {
+          toast.error(`Something went wrong`, {
+            theme: "dark",
+            position: "top-center",
+            autoClose: 1000,
+            pauseOnFocusLoss: false,
+          });
+        }
+      });
+    },
+    [bookingRequests]
+  );
+
   const bookingRequestTab = (
     <Row className="standard-grid">
       {bookingRequests.length > 0 &&
         bookingRequests.map((br) => (
-          <Col>
-            <BookingCard booking={br} mine={false} />
+          <Col key={br._id}>
+            <BookingCard
+              booking={br}
+              mine={false}
+              reviewRequest={reviewRequest}
+            />
           </Col>
         ))}
     </Row>
