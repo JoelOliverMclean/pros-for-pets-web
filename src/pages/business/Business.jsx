@@ -124,7 +124,9 @@ function Business() {
               <a
                 type="button"
                 className="btn btn-link-mids-mutts text-start d-flex"
-                href={business.website}
+                href={`${!business?.website?.startsWith("http") && "https://"}${
+                  business.website
+                }`}
                 target="_blank"
                 rel="noreferrer"
               >
