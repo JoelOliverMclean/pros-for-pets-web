@@ -1,21 +1,18 @@
 import { Fragment, useContext, useState, useEffect, useCallback } from "react";
 import Card from "react-bootstrap/Card";
 import Col from "react-bootstrap/Col";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Row from "react-bootstrap/Row";
 import Container from "react-bootstrap/Container";
-import Button from "react-bootstrap/Button";
 import { AuthContext } from "../helpers/AuthContext";
 import { apiGet } from "../helpers/NetworkHelper";
 import { ClipLoader } from "react-spinners";
-import { toast } from "react-toastify";
 import BookingCard from "../components/BookingCard";
 
 function Dashboard() {
   const { loggedInUser } = useContext(AuthContext);
 
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [loading, setLoading] = useState(true);
   const [loadingPros, setLoadingPros] = useState(true);
@@ -140,7 +137,6 @@ function Dashboard() {
     setLoadingPros(true);
     setLoadingUpcomingBookings(true);
     apiGet("user/dashboard").then((response) => {
-      console.log(response.data);
       setLoading(false);
       setLoadingPros(false);
       setLoadingUpcomingBookings(false);
@@ -151,7 +147,7 @@ function Dashboard() {
         navigate("/");
       }
     });
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     getDashboard();

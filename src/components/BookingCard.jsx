@@ -1,8 +1,10 @@
-import { Fragment } from "react";
+import { Fragment, useContext } from "react";
 import Card from "react-bootstrap/Card";
 import moment from "moment";
+import { AuthContext } from "../helpers/AuthContext";
 
 function BookingCard({ booking, mine, reviewRequest }) {
+  const { loggedInUser } = useContext(AuthContext);
   return (
     <Card className="h-100">
       <Card.Header>
@@ -11,9 +13,12 @@ function BookingCard({ booking, mine, reviewRequest }) {
         ) : (
           <div className="lead d-flex align-items-end">
             <span className="small">{booking.businessUserPet.pet.name}</span>
-            <span className="small ps-1">
-              {`(${booking.businessUserPet.pet.owner.firstname} ${booking.businessUserPet.pet.owner.lastname})`}
-            </span>
+            {booking.businessUserPet.pet.owner.username !==
+              loggedInUser.username && (
+              <span className="small ps-1">
+                {`(${booking.businessUserPet.pet.owner.firstname} ${booking.businessUserPet.pet.owner.lastname})`}
+              </span>
+            )}
           </div>
         )}
       </Card.Header>
@@ -44,10 +49,11 @@ function BookingCard({ booking, mine, reviewRequest }) {
               <a
                 className="remove-underline"
                 href={
-                  booking.bookingSlot.locationLink ??
-                  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                    booking.bookingSlot.location
-                  )}`
+                  booking.bookingSlot.locationLink?.length > 0
+                    ? booking.bookingSlot.locationLink
+                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                        booking.bookingSlot.location
+                      )}`
                 }
                 target="_blank"
                 rel="noreferrer"

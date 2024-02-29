@@ -214,9 +214,9 @@ function Business() {
       <div>
         <h2 className="pe-3">Services</h2>
         {business.services ? (
-          <div className="row py-2 row-cols-lg-4 row-cols-sm-2">
+          <div className="standard-grid">
             {business.services.map((service) => (
-              <div key={service._id}>
+              <div className="col" key={service._id}>
                 <Card>
                   <Card.Header className="lead">{service.name}</Card.Header>
                   <Card.Body>{service.description}</Card.Body>
