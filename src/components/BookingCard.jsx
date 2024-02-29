@@ -14,33 +14,17 @@ function BookingCard({
   return (
     <Card className="h-100">
       <Card.Header>
-        {booking.confirmed && !mine ? (
-          <div className="lead">{booking.bookingSlot.service.name}</div>
-        ) : (
-          <div className="d-flex flex-wrap gap-1 align-items-center">
-            <span className="lead">{booking.businessUserPet.pet.name}</span>
-            {!mine && (
-              <span className="small mt-1">
-                {`(${booking.businessUserPet.pet.owner.firstname} ${booking.businessUserPet.pet.owner.lastname})`}
-              </span>
-            )}
-          </div>
-        )}
+        <div className="lead">{booking.bookingSlot.service.name}</div>
       </Card.Header>
       <Card.Body className="d-flex flex-column gap-2">
-        {booking.status === "PENDING" && (
-          <div className="flex-fill text-center bg-secondary px-2 py-1 rounded-3 text-subtle">
-            PENDING
-          </div>
-        )}
-        {(!booking.confirmed || mine) && (
-          <div>
-            <b className="fs-5">{booking.bookingSlot.service.name}</b>
-            {showBusiness && (
-              <div className="mt-0">with {booking.business.name}</div>
-            )}
-          </div>
-        )}
+        <div className="mt-0">
+          with <b>{booking?.business?.name}</b>
+        </div>
+        <div>
+          <i className="fa-solid fa-paw"></i>
+          {"  Pet: "}
+          {booking.businessUserPet.pet.name}
+        </div>
         <div>
           <i className="fa-solid fa-calendar-days"></i>
           {"  "}
@@ -96,7 +80,9 @@ function BookingCard({
                     : "btn-success disabled"
                 } flex-fill`}
               >
-                {booking.payment === "OUTSTANDING" ? "Pay" : "Paid"}
+                {booking.payment === "OUTSTANDING"
+                  ? `Pay £${(booking.cost / 100).toFixed(2)}`
+                  : "Paid"}
               </button>
             )}
             {moment(booking.start_time) > moment() && (

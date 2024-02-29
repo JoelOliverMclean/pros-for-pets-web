@@ -19,9 +19,12 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [loadingPros, setLoadingPros] = useState(true);
   const [loadingUpcomingBookings, setLoadingUpcomingBookings] = useState(true);
+  const [loadingOutstandingPayments, setLoadingOutstandingPayments] =
+    useState(true);
 
   const [businessUsers, setBusinessUsers] = useState([]);
   const [upcomingBookings, setUpcomingBookings] = useState([]);
+  const [outstandingPayments, setOutstandingPayments] = useState([]);
 
   const headerSection = (
     <div>
@@ -48,6 +51,164 @@ function Dashboard() {
       ) / 100.0
     );
   };
+
+  const getOutstandingPayments = useCallback(() => {
+    setLoadingOutstandingPayments(true);
+    apiGet("bookings", {
+      tense: "BOTH",
+      pageSize: 4,
+      page: 0,
+      payment: "OUTSTANDING",
+    }).then((response) => {
+      if (response.status === 200) {
+        setOutstandingPayments(response.data.bookings);
+      } else {
+      }
+      setLoadingOutstandingPayments(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    getOutstandingPayments();
+  }, [getOutstandingPayments]);
+
+  const outstandingPaymentsSection = (
+    <Fragment>
+      <hr />
+      <div>
+        <h2>Outstanding Payments</h2>
+      </div>
+      {loadingOutstandingPayments ? (
+        <div className="d-flex pt-2">
+          <ClipLoader className="mx-auto" color="#0082b4" />
+        </div>
+      ) : outstandingPayments.length > 0 ? (
+        <Row className="row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-1 pt-2">
+          {outstandingPayments.map((booking) => (
+            <div key={booking._id} className="col">
+              <BookingCard booking={booking} mine={true} />
+            </div>
+          ))}
+        </Row>
+      ) : (
+        <div className="lead text-subtle text-center">
+          No upcoming bookings.
+        </div>
+      )}
+    </Fragment>
+  );
+
+  const getPros = useCallback(() => {
+    setLoadingPros(true);
+    apiGet("business-user").then((response) => {
+      setLoadingPros(false);
+      if (response.status === 200) {
+        setBusinessUsers(response.data.pros);
+      } else {
+        navigate("/");
+      }
+    });
+  }, [navigate]);
+
+  useEffect(() => {
+    getPros();
+  }, [getPros]);
+
+  const prosSection = (
+    <Fragment>
+      <hr />
+      <div className="d-flex align-items-center">
+        <h2>Professionals</h2>
+        {!loading && businessUsers.length > 0 && (
+          <Link
+            to={{ pathname: "/businesses" }}
+            state={{ from: { title: "Dashboard" } }}
+            className="btn btn-outline-mids-mutts ms-auto"
+          >
+            Find More
+          </Link>
+        )}
+      </div>
+      {loadingPros ? (
+        <div className="d-flex pt-2">
+          <ClipLoader className="mx-auto" color="#0082b4" />
+        </div>
+      ) : businessUsers.length > 0 ? (
+        <Row className="row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-1 pt-2">
+          {businessUsers.map((businessUser) => (
+            <Col key={businessUser.id}>
+              <Card>
+                <Card.Header className="lead">
+                  {businessUser.business.name}
+                </Card.Header>
+                <Card.Footer className="p-2 d-flex gap-2">
+                  <Link
+                    to={{
+                      pathname: `/businesses/${businessUser.business.slug}`,
+                    }}
+                    state={{
+                      from: {
+                        title: "Dashboard",
+                      },
+                    }}
+                    className="btn btn-mids-mutts flex-fill"
+                  >
+                    Go To
+                  </Link>
+                  {/* <Link
+                    to={{
+                      pathname: `/bookings?business=${businessUser.business.slug}`,
+                    }}
+                    state={{
+                      from: {
+                        title: "Dashboard",
+                      },
+                    }}
+                    className="btn btn-mids-mutts flex-fill"
+                  >
+                    Bookings
+                  </Link> */}
+                </Card.Footer>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      ) : (
+        <div className="text-center">
+          <p className="text-subtle lead">
+            You don't have any professionals yet
+          </p>
+          <Link
+            to={{ pathname: "/businesses" }}
+            state={{ from: { title: "Dashboard" } }}
+            className="btn btn-mids-mutts"
+          >
+            Find one
+          </Link>
+        </div>
+      )}
+    </Fragment>
+  );
+
+  const getUpcomingBookings = useCallback(() => {
+    setLoadingUpcomingBookings(true);
+    apiGet("bookings/asSlots", {
+      tense: "FUTURE",
+      pageSize: 4,
+      page: 0,
+    }).then((response) => {
+      setLoadingUpcomingBookings(false);
+      if (response.status === 200) {
+        setUpcomingBookings(response.data.bookingSlots);
+      } else {
+        navigate("/");
+      }
+    });
+  }, [navigate]);
+
+  useEffect(() => {
+    getUpcomingBookings();
+  }, [getUpcomingBookings]);
 
   const bookingSlotsElement = upcomingBookings.map((bookingSlot) => {
     return (
@@ -156,121 +317,10 @@ function Dashboard() {
     </Fragment>
   );
 
-  const prosSection = (
-    <Fragment>
-      <hr />
-      <div className="d-flex align-items-center">
-        <h2>Professionals</h2>
-        {!loading && businessUsers.length > 0 && (
-          <Link
-            to={{ pathname: "/businesses" }}
-            state={{ from: { title: "Dashboard" } }}
-            className="btn btn-outline-mids-mutts ms-auto"
-          >
-            Find More
-          </Link>
-        )}
-      </div>
-      {loadingPros ? (
-        <div className="d-flex pt-2">
-          <ClipLoader className="mx-auto" color="#0082b4" />
-        </div>
-      ) : businessUsers.length > 0 ? (
-        <Row className="row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-1 pt-2">
-          {businessUsers.map((businessUser) => (
-            <Col key={businessUser.id}>
-              <Card>
-                <Card.Header className="lead">
-                  {businessUser.business.name}
-                </Card.Header>
-                <Card.Footer className="p-2 d-flex gap-2">
-                  <Link
-                    to={{
-                      pathname: `/businesses/${businessUser.business.slug}`,
-                    }}
-                    state={{
-                      from: {
-                        title: "Dashboard",
-                      },
-                    }}
-                    className="btn btn-mids-mutts flex-fill"
-                  >
-                    Go To
-                  </Link>
-                  {/* <Link
-                    to={{
-                      pathname: `/bookings?business=${businessUser.business.slug}`,
-                    }}
-                    state={{
-                      from: {
-                        title: "Dashboard",
-                      },
-                    }}
-                    className="btn btn-mids-mutts flex-fill"
-                  >
-                    Bookings
-                  </Link> */}
-                </Card.Footer>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      ) : (
-        <div className="text-center">
-          <p className="text-subtle lead">
-            You don't have any professionals yet
-          </p>
-          <Link
-            to={{ pathname: "/businesses" }}
-            state={{ from: { title: "Dashboard" } }}
-            className="btn btn-mids-mutts"
-          >
-            Find one
-          </Link>
-        </div>
-      )}
-    </Fragment>
-  );
-
-  const getPros = useCallback(() => {
-    setLoadingPros(true);
-    apiGet("business-user").then((response) => {
-      setLoadingPros(false);
-      if (response.status === 200) {
-        setBusinessUsers(response.data.pros);
-      } else {
-        navigate("/");
-      }
-    });
-  }, [navigate]);
-
-  const getUpcomingBookings = useCallback(() => {
-    setLoadingUpcomingBookings(true);
-    apiGet("bookings/asSlots", {
-      tense: "BOTH",
-      pageSize: 4,
-      page: 0,
-    }).then((response) => {
-      setLoadingUpcomingBookings(false);
-      if (response.status === 200) {
-        setUpcomingBookings(response.data.bookingSlots);
-      } else {
-        navigate("/");
-      }
-    });
-  }, [navigate]);
-
-  useEffect(() => {
-    getPros();
-  }, []);
-
-  useEffect(() => {
-    getUpcomingBookings();
-  }, [getUpcomingBookings]);
-
   return (
     <Container>
       {headerSection}
+      {outstandingPaymentsSection}
       {upcomingBookingsSection}
       {prosSection}
     </Container>
