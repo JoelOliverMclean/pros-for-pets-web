@@ -3,19 +3,18 @@ import Card from "react-bootstrap/Card";
 import moment from "moment";
 import { AuthContext } from "../helpers/AuthContext";
 
-function BookingCard({ booking, mine, reviewRequest }) {
+function BookingCard({ booking, mine, reviewRequest, showBusiness }) {
   const { loggedInUser } = useContext(AuthContext);
   return (
     <Card className="h-100">
       <Card.Header>
-        {booking.confirmed ? (
+        {booking.confirmed && !mine ? (
           <div className="lead">{booking.bookingSlot.service.name}</div>
         ) : (
-          <div className="lead d-flex align-items-end">
-            <span className="small">{booking.businessUserPet.pet.name}</span>
-            {booking.businessUserPet.pet.owner.username !==
-              loggedInUser.username && (
-              <span className="small ps-1">
+          <div className="d-flex flex-wrap gap-1 align-items-center">
+            <span className="lead">{booking.businessUserPet.pet.name}</span>
+            {!mine && (
+              <span className="small mt-1">
                 {`(${booking.businessUserPet.pet.owner.firstname} ${booking.businessUserPet.pet.owner.lastname})`}
               </span>
             )}
@@ -23,8 +22,18 @@ function BookingCard({ booking, mine, reviewRequest }) {
         )}
       </Card.Header>
       <Card.Body className="d-flex flex-column gap-2">
-        {!booking.confirmed && (
-          <div className="lead">{booking.bookingSlot.service.name}</div>
+        {booking.status === "PENDING" && (
+          <div className="flex-fill text-center bg-secondary px-2 py-1 rounded-3 text-subtle">
+            PENDING
+          </div>
+        )}
+        {(!booking.confirmed || mine) && (
+          <div>
+            <b className="fs-5">{booking.bookingSlot.service.name}</b>
+            {showBusiness && (
+              <div className="mt-0">with {booking.business.name}</div>
+            )}
+          </div>
         )}
         <div>
           <i className="fa-solid fa-calendar-days"></i>
@@ -68,30 +77,45 @@ function BookingCard({ booking, mine, reviewRequest }) {
           </Fragment>
         )}
       </Card.Body>
-      {mine === false && (
-        <Card.Footer className="p-2 d-flex gap-2">
-          {booking.confirmed ? (
-            <button className="btn btn-outline-mids-mutts flex-fill">
-              Manage
-            </button>
-          ) : (
-            <Fragment>
+      <Card.Footer className="p-2 d-flex gap-2">
+        {mine ? (
+          <Fragment>
+            {booking.status === "CONFIRMED" && (
               <button
-                className="btn btn-success flex-fill"
-                onClick={() => reviewRequest(booking, true)}
+                className={`btn ${
+                  booking.payment === "OUTSTANDING"
+                    ? "btn-success"
+                    : booking.payment === "PENDING"
+                    ? "btn-secondary disabled"
+                    : "btn-success disabled"
+                } flex-fill`}
               >
-                Accept
+                {booking.payment === "OUTSTANDING" ? "Pay" : "Paid"}
               </button>
-              <button
-                className="btn btn-outline-danger flex-fill"
-                onClick={() => reviewRequest(booking, false)}
-              >
-                Reject
+            )}
+            {moment(booking.start_time) > moment() && (
+              <button className="btn btn-outline-danger flex-fill">
+                Cancel
               </button>
-            </Fragment>
-          )}
-        </Card.Footer>
-      )}
+            )}
+          </Fragment>
+        ) : (
+          <Fragment>
+            {booking.confirmed ? (
+              <button className="btn btn-outline-mids-mutts flex-fill">
+                Manage
+              </button>
+            ) : (
+              <Fragment>
+                <button className="btn btn-success flex-fill">Accept</button>
+                <button className="btn btn-outline-danger flex-fill">
+                  Deny
+                </button>
+              </Fragment>
+            )}
+          </Fragment>
+        )}
+      </Card.Footer>
     </Card>
   );
 }

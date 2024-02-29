@@ -44,7 +44,7 @@ function Dashboard() {
         <Row className="row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-1 pt-2">
           {upcomingBookings.map((booking) => (
             <div key={booking.id}>
-              <BookingCard booking={booking} mine={true} />
+              <BookingCard booking={booking} mine={true} showBusiness={true} />
             </div>
           ))}
         </Row>
@@ -132,17 +132,49 @@ function Dashboard() {
     </Fragment>
   );
 
-  const getDashboard = useCallback(() => {
-    setLoading(true);
+  // const getDashboard = useCallback(() => {
+  //   setLoading(true);
+  //   setLoadingPros(true);
+  //   setLoadingUpcomingBookings(true);
+  //   apiGet("user/dashboard").then((response) => {
+  //     setLoading(false);
+  //     setLoadingPros(false);
+  //     setLoadingUpcomingBookings(false);
+  //     if (response.status === 200) {
+  //       setBusinessUsers(response.data.pros);
+  //       setUpcomingBookings(response.data.upcomingBookings);
+  //     } else {
+  //       navigate("/");
+  //     }
+  //   });
+  // }, [navigate]);
+
+  // useEffect(() => {
+  //   getDashboard();
+  // }, [getDashboard]);
+
+  const getPros = useCallback(() => {
     setLoadingPros(true);
-    setLoadingUpcomingBookings(true);
-    apiGet("user/dashboard").then((response) => {
-      setLoading(false);
+    apiGet("business-user").then((response) => {
       setLoadingPros(false);
-      setLoadingUpcomingBookings(false);
       if (response.status === 200) {
         setBusinessUsers(response.data.pros);
-        setUpcomingBookings(response.data.upcomingBookings);
+      } else {
+        navigate("/");
+      }
+    });
+  }, [navigate]);
+
+  const getUpcomingBookings = useCallback(() => {
+    setLoadingUpcomingBookings(true);
+    apiGet("bookings", {
+      tense: "FUTURE",
+      pageSize: 4,
+      page: 0,
+    }).then((response) => {
+      setLoadingUpcomingBookings(false);
+      if (response.status === 200) {
+        setUpcomingBookings(response.data.bookings);
       } else {
         navigate("/");
       }
@@ -150,8 +182,12 @@ function Dashboard() {
   }, [navigate]);
 
   useEffect(() => {
-    getDashboard();
-  }, [getDashboard]);
+    getPros();
+  }, []);
+
+  useEffect(() => {
+    getUpcomingBookings();
+  }, [getUpcomingBookings]);
 
   return (
     <Container>
