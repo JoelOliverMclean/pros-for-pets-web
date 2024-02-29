@@ -20,7 +20,7 @@ function RequestBooking({ pets, show, setShow, selectedBookingSlot, refresh }) {
       if (selectedPet) {
         setWaiting(true);
         apiPost("bookings/request", {
-          bookingSlotId: selectedBookingSlot._id,
+          slotId: selectedBookingSlot._id,
           petId: selectedPet._id,
         }).then((response) => {
           setWaiting(false);

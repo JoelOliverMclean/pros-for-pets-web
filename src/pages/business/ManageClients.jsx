@@ -65,15 +65,15 @@ function ManageClients() {
         <Card.Body>
           <div>
             <div>Pets Managed:</div>
-            <div className="px-2">
+            <ul className="mb-0">
               {client.businessUserPets.length > 0 ? (
                 client.businessUserPets.map((pet) => (
-                  <div>&#x2022; {pet.pet.name}</div>
+                  <li key={pet._id}>{pet.pet.name}</li>
                 ))
               ) : (
                 <div className="text-center text-subtle pt-2">None managed</div>
               )}
-            </div>
+            </ul>
           </div>
         </Card.Body>
         <Card.Footer className="p-2">
