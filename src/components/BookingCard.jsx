@@ -3,7 +3,13 @@ import Card from "react-bootstrap/Card";
 import moment from "moment";
 import { AuthContext } from "../helpers/AuthContext";
 
-function BookingCard({ booking, mine, reviewRequest, showBusiness }) {
+function BookingCard({
+  booking,
+  mine,
+  reviewRequest,
+  showBusiness,
+  manageBookingSlot,
+}) {
   const { loggedInUser } = useContext(AuthContext);
   return (
     <Card className="h-100">

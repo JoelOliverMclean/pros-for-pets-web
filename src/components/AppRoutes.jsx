@@ -16,6 +16,7 @@ import ManageClients from "../pages/business/ManageClients";
 import BookingSlots from "../pages/business/booking_slots/BookingSlots";
 import BookingSlotForm from "../pages/business/booking_slots/BookingSlotForm";
 import Dashboard from "../pages/Dashboard";
+import ManageBookingSlot from "../pages/business/booking_slots/ManageBookingSlot";
 
 function AppRoutes() {
   return (
@@ -31,6 +32,14 @@ function AppRoutes() {
       <Route path="/manage-business/booking-slots" element={<BookingSlots />} />
       <Route
         path="/manage-business/booking-slots/new"
+        element={<BookingSlotForm />}
+      />
+      <Route
+        path="/manage-business/booking-slots/manage"
+        element={<ManageBookingSlot />}
+      />
+      <Route
+        path="/manage-business/booking-slots/edit"
         element={<BookingSlotForm />}
       />
       <Route path="/manage-business/edit" element={<BusinessForm />} />

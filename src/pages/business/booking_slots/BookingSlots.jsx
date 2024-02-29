@@ -4,6 +4,7 @@ import {
   useNavigate,
   Link,
   useSearchParams,
+  createSearchParams,
 } from "react-router-dom";
 import { apiGet } from "../../../helpers/NetworkHelper";
 import { AuthContext } from "../../../helpers/AuthContext";
@@ -13,6 +14,7 @@ import Row from "react-bootstrap/Row";
 import { Card } from "react-bootstrap";
 import { toast } from "react-toastify";
 import moment from "moment";
+import Page from "../../../components/Page";
 
 function BookingSlots() {
   const { loggedInUser } = useContext(AuthContext);
@@ -39,6 +41,24 @@ function BookingSlots() {
   const [results, setResults] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const [bookingSlots, setBookingSlots] = useState([]);
+
+  const manageBookingSlot = useCallback((slot) => {
+    navigate(
+      {
+        pathname: "manage",
+        search: `?${createSearchParams({
+          slot: slot._id,
+        })}`,
+      },
+      {
+        state: {
+          from: {
+            title: "Manage Booking Slots",
+          },
+        },
+      }
+    );
+  }, []);
 
   const bookingSlotsElement = bookingSlots.map((bookingSlot) => {
     return (
@@ -91,7 +111,10 @@ function BookingSlots() {
             )}
           </Card.Body>
           <Card.Footer className="p-2">
-            <button className="btn btn-outline-mids-mutts form-control">
+            <button
+              onClick={() => manageBookingSlot(bookingSlot)}
+              className="btn btn-outline-mids-mutts form-control"
+            >
               Manage
             </button>
           </Card.Footer>
@@ -199,25 +222,23 @@ function BookingSlots() {
     getBookingSlots();
   }, [getBookingSlots]);
 
+  const newSlot = () => {
+    navigate(
+      { pathname: "new" },
+      { state: { from: { title: "Booking Slots" } } }
+    );
+  };
+
   return (
-    <div className="container">
-      {location?.state?.from?.title && (
-        <div className="mb-2">
-          <button className="btn btn-sm btn-link" onClick={() => navigate(-1)}>
-            <i className="fa-solid fa-arrow-left pe-2"></i>
-            {location?.state?.from?.title}
-          </button>
-        </div>
-      )}
-      <div className="d-flex align-items-center">
-        <h1>Manage Booking Slots</h1>
-        <Link
-          to={{ pathname: "new" }}
-          className="btn btn-outline-mids-mutts ms-auto"
-        >
+    <Page
+      title="Booking Slots"
+      titleButtonContent={
+        <div>
           Add New&nbsp;&nbsp;<i className="fa-solid fa-plus"></i>
-        </Link>
-      </div>
+        </div>
+      }
+      titleButtonOnClick={() => newSlot()}
+    >
       <div className="d-sm-flex flex-wrap justify-content-start">
         <div className="p-2">{serviceOptions}</div>
         <div className="p-2">
@@ -259,7 +280,7 @@ function BookingSlots() {
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 }
 

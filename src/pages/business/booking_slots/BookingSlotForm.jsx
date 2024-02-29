@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { getCsrfToken, apiGet, apiPost } from "../../../helpers/NetworkHelper";
 import { ClipLoader } from "react-spinners";
@@ -19,61 +19,17 @@ const getMinuteDiff = (a, b) => {
 };
 
 function BookingSlotForm() {
-  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("slot");
 
   const navigate = useNavigate();
   const location = useLocation();
 
   const [error, setError] = useState(null);
 
-  const [bookingSlot, setBookingSlot] = useState(null);
-  const [values, setValues] = useState(null);
-  const [loaded, setLoaded] = useState(!id);
-
-  const [services, setServices] = useState(location?.state?.services ?? []);
-
-  const getBookingSlot = useCallback(() => {
-    setLoaded(false);
-    apiGet(`manage-booking-slots/slot/${id}`).then((response) => {
-      setLoaded(true);
-      if (response.status === 200) {
-        setBookingSlot(response.data);
-        setValues({
-          ...values,
-          service: response.data.service,
-          spaces: response.data.slots,
-          cost: response.data.cost,
-          startdate: moment(response.data.start_time).format("yyyy-MM-DD"),
-          starttime: moment(response.data.start_time).format("HH:mm"),
-          hours: getHourDiff(response.data.start_time, response.data.end_time),
-          minutes: getMinuteDiff(
-            response.data.start_time,
-            response.data.end_time
-          ),
-          enddate: moment(response.data.end_time).format("yyyy-MM-DD"),
-          endtime: moment(response.data.end_time).format("HH:mm"),
-          location: response.data.location,
-          locationLink: response.data.locationLink,
-          info: response.data.info,
-          id: response.data._id,
-        });
-      } else {
-        navigate("/");
-      }
-    });
-  }, [id, navigate, values]);
-
-  const getServices = useCallback(() => {
-    apiGet(`manage-services`).then((response) => {
-      if (response.status === 200) {
-        setServices(response.data);
-      }
-    });
-  }, []);
-
-  const initialValues = {
+  const [values, setValues] = useState({
     service: "",
-    slots: 1,
+    slots: 3,
     startdate: moment().format("YYYY-MM-DD"),
     starttime: moment().format("HH:mm"),
     hours: "",
@@ -82,7 +38,51 @@ function BookingSlotForm() {
     location: "",
     locationLink: "",
     info: "",
-  };
+  });
+  const [loaded, setLoaded] = useState(!id);
+
+  const [services, setServices] = useState(location?.state?.services ?? []);
+
+  const getBookingSlot = useCallback(() => {
+    setLoaded(false);
+    apiGet(`manage-booking-slots/${id}`).then((response) => {
+      if (response.status === 200) {
+        setValues({
+          service: response.data.bookingSlot.service._id,
+          slots: String(response.data.bookingSlot.slots),
+          cost: response.data.bookingSlot.cost,
+          startdate: moment(response.data.bookingSlot.start_time).format(
+            "yyyy-MM-DD"
+          ),
+          starttime: moment(response.data.bookingSlot.start_time).format(
+            "HH:mm"
+          ),
+          hours: getHourDiff(
+            response.data.bookingSlot.start_time,
+            response.data.bookingSlot.end_time
+          ),
+          minutes: getMinuteDiff(
+            response.data.bookingSlot.start_time,
+            response.data.bookingSlot.end_time
+          ),
+          location: response.data.bookingSlot.location,
+          locationLink: response.data.bookingSlot.locationLink,
+          info: response.data.bookingSlot.info,
+        });
+      } else {
+        // navigate("/");
+      }
+      setLoaded(true);
+    });
+  }, [id, navigate, setValues]);
+
+  const getServices = useCallback(() => {
+    apiGet(`manage-services`).then((response) => {
+      if (response.status === 200) {
+        setServices(response.data);
+      }
+    });
+  }, []);
 
   const validationSchema = Yup.object().shape({
     service: Yup.string()
@@ -108,7 +108,7 @@ function BookingSlotForm() {
   });
 
   const upload = async (data) => {
-    if (bookingSlot) data["id"] = bookingSlot._id;
+    if (id) data["id"] = id;
     apiPost("manage-booking-slots", data).then((response) => {
       if (response.status === 200) {
         setError(null);
@@ -154,12 +154,12 @@ function BookingSlotForm() {
           </div>
         )}
         <div className="col-lg-8 col-12 display-8">
-          {bookingSlot ? "Edit" : "New"} Booking Slot
+          {id ? "Edit" : "New"} Booking Slot
         </div>
         <div className="col-lg-8 col-12">
           {loaded && services.length > 0 ? (
             <Formik
-              initialValues={initialValues}
+              initialValues={values}
               onSubmit={upload}
               validationSchema={validationSchema}
             >
@@ -344,7 +344,7 @@ function BookingSlotForm() {
                   className="btn btn-mids-mutts form-control mt-4"
                   type="submit"
                 >
-                  {bookingSlot ? "Save Slot" : "Create Slot"}
+                  {id ? "Save Slot" : "Create Slot"}
                 </button>
               </Form>
             </Formik>
