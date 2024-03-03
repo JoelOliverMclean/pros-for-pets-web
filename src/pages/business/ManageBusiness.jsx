@@ -20,8 +20,19 @@ import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import Button from "react-bootstrap/Button";
 import Accordion from "react-bootstrap/Accordion";
 import BookingCard from "../../components/BookingCard";
+import { Formik, Form, Field } from "formik";
+import {
+  Editor,
+  EditorState,
+  RichUtils,
+  convertFromRaw,
+  convertToRaw,
+  ContentState,
+} from "draft-js";
+import DraftEditor from "../../components/editor/DraftEditor";
 
 function ManageBusiness() {
   const { loggedInUser } = useContext(AuthContext);
@@ -40,6 +51,14 @@ function ManageBusiness() {
   const [bookingRequests, setBookingRequests] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
+  const [editingPaymentInstructions, setEditingPaymentInstructions] =
+    useState(false);
+  const [savingPaymentInstructions, setSavingPaymentInstructions] =
+    useState(false);
+  const [paymentInstructions, setPaymentInstructions] = useState(null);
+
+  const defaultTab = "paymentInstructions"; // approvals?.length > 0 ? "clients" : "bookings";
+
   const getBusiness = useCallback(() => {
     setLoaded(false);
     apiGet("manage-business").then((response) => {
@@ -47,6 +66,14 @@ function ManageBusiness() {
       if (response.status === 200) {
         if (response.data) {
           setBusiness(response.data.business);
+          setEditorState(
+            EditorState.createWithContent(
+              ContentState.createFromText(
+                response.data.business?.paymentInstructions ?? ""
+              )
+            )
+          );
+          setPaymentInstructions(response.data.business?.paymentInstructions);
           setApprovals(
             response.data.business.businessUsers.filter((bu) => !bu.confirmed)
           );
@@ -271,6 +298,81 @@ function ManageBusiness() {
     </Row>
   );
 
+  const savePaymentInstructions = () => {
+    setSavingPaymentInstructions(true);
+    apiPost("manage-business/payment-instructions", {
+      paymentInstructions: editorState.getCurrentContent().getPlainText(),
+    }).then((response) => {
+      setSavingPaymentInstructions(false);
+      if (response.status === 200) {
+        console.log(response.data);
+        setPaymentInstructions(response.data.paymentInstructions);
+        setEditorState(
+          EditorState.createWithContent(
+            ContentState.createFromText(response.data.paymentInstructions ?? "")
+          )
+        );
+      } else {
+        // Failed
+      }
+      setEditingPaymentInstructions(false);
+    });
+  };
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+
+  const paymentInstructionsTab = (
+    <Fragment>
+      <div className="d-flex flex-column gap-3 align-items-start">
+        {editingPaymentInstructions ? (
+          <div className="w-100 d-flex flex-column gap-3 ">
+            <DraftEditor
+              editorState={editorState}
+              setEditorState={setEditorState}
+            />
+            <div className="d-flex gap-3">
+              <Button variant="success" onClick={savePaymentInstructions}>
+                Save Instructions
+              </Button>
+              <Button
+                variant="outline-light"
+                onClick={() => setEditingPaymentInstructions(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="w-100 d-flex flex-column gap-3 align-items-start">
+            {paymentInstructions ? (
+              <div className="showLineBreaks w-100">{paymentInstructions}</div>
+            ) : (
+              <div className="text-center w-100">
+                {
+                  "To make payments quicker and easier for your clients, you can add payment instructions which will show for them whenever they click "
+                }
+                <Button variant="success" className="btn-sm">
+                  Pay
+                </Button>
+                {" on a booking on this site"}
+              </div>
+            )}
+
+            <Button
+              variant="success"
+              className={`${!paymentInstructions && "align-self-center"}`}
+              onClick={() =>
+                setEditingPaymentInstructions(!editingPaymentInstructions)
+              }
+            >
+              {paymentInstructions ? "Edit" : "Add"}
+              {" Payment Instructions"}
+            </Button>
+          </div>
+        )}
+      </div>
+    </Fragment>
+  );
+
   const clientTab = (
     <Fragment>
       {approvals?.length > 0 && <Fragment>{approveUsersElement}</Fragment>}
@@ -302,10 +404,7 @@ function ManageBusiness() {
   );
 
   const tabbedElement = (
-    <Tabs
-      defaultActiveKey={approvals?.length > 0 ? "clients" : "bookings"}
-      className="mt-3"
-    >
+    <Tabs defaultActiveKey={defaultTab} className="mt-3">
       {approvals?.length > 0 && (
         <Tab eventKey="clients" title={clientsTabTitle}>
           <div className="border-start border-end border-bottom border-1 rounded-bottom-3 p-3 bg-fore">
@@ -321,6 +420,11 @@ function ManageBusiness() {
       <Tab eventKey="services" title="Services">
         <div className="border-start border-end border-bottom border-1 rounded-bottom-3 p-3 bg-fore">
           {servicesTab}
+        </div>
+      </Tab>
+      <Tab eventKey="paymentInstructions" title="Payment Instructions">
+        <div className="border-start border-end border-bottom border-1 rounded-bottom-3 p-3 bg-fore">
+          {paymentInstructionsTab}
         </div>
       </Tab>
     </Tabs>
@@ -341,6 +445,10 @@ function ManageBusiness() {
       <Accordion.Item eventKey="services">
         <Accordion.Header>Services</Accordion.Header>
         <Accordion.Body>{servicesTab}</Accordion.Body>
+      </Accordion.Item>
+      <Accordion.Item eventKey="paymentInstructions">
+        <Accordion.Header>Payment Instructions</Accordion.Header>
+        <Accordion.Body>{paymentInstructionsTab}</Accordion.Body>
       </Accordion.Item>
     </Accordion>
   );

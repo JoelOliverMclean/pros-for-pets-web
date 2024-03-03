@@ -1,11 +1,6 @@
 @import "../../../node_modules/bootstrap/scss/functions";
 
-$mids-mutts: #0082b4;
-$primary: #0082b4;
-$fore: #2a2a2a;
-$subtle: #888;
-$secondary: #3a3a3a;
-$background: #222;
+@import "_variables";
 
 @import "../../../node_modules/bootstrap/scss/variables";
 @import "../../../node_modules/bootstrap/scss/variables-dark";
@@ -96,4 +91,80 @@ hr {
 .nav-tabs .nav-link.active {
   background-color: $fore;
   border-bottom-color: transparent;
+}
+
+.ql-snow .ql-picker {
+  color: $light;
+}
+
+.ql-snow .ql-stroke {
+  stroke: $light;
+}
+
+.ql-snow .ql-fill {
+  fill: $light;
+}
+
+.ql-toolbar.ql-snow {
+  @extend .rounded-top-3;
+}
+
+.ql-editor p {
+  @extend .fs-6;
+}
+
+.editor-wrapper {
+  width: "100%";
+}
+
+.editor-container {
+  @extend .rounded-3;
+  width: 100%;
+  border: 1px solid $subtle;
+  padding: 1rem;
+}
+
+.toolbar-grid {
+  @extend .pb-2;
+  display: flex;
+  flex-wrap: wrap;
+  flex-basis: 1fr 1fr;
+}
+
+.superFancyBlockquote {
+  color: #999;
+  background: #fff;
+  font-family: "Hoefler Text", Georgia, serif;
+  font-style: italic;
+  border-left: 2px solid #999;
+  padding-left: 10px;
+}
+
+.codeBlock {
+  font-family: fira-code, monospace;
+  font-size: inherit;
+  background: #ffeff0;
+  font-style: italic;
+  word-wrap: normal;
+  word-wrap: break-word;
+  box-decoration-break: slice;
+  padding: 0.3rem 2rem;
+  border-radius: 0.2rem;
+}
+
+.leftAlign {
+  text-align: left;
+}
+.rightAlign {
+  text-align: right;
+}
+.centerAlign {
+  text-align: center;
+}
+.justifyAlign {
+  text-align: justify;
+}
+
+.showLineBreaks {
+  white-space: pre-line;
 }
