@@ -7,7 +7,6 @@ import "draft-js/dist/Draft.css";
 import "./assets/css/App.css";
 import "./assets/css/custom.css";
 import "./assets/css/MidsMutts.css";
-import "./assets/css/DraftEditor.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
