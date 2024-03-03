@@ -28,9 +28,9 @@ const DraftEditor = ({
     const newState = RichUtils.handleKeyCommand(editorState, command);
     if (newState) {
       setEditorState(newState);
-      return true;
+      return "handled";
     }
-    return false;
+    return "not-handled";
   };
 
   // FOR INLINE STYLES
@@ -102,8 +102,6 @@ const DraftEditor = ({
           customStyleMap={styleMap}
           blockStyleFn={myBlockStyleFn}
           onChange={(editorState) => {
-            const contentState = editorState.getCurrentContent();
-            console.log(convertToRaw(contentState));
             setEditorState(editorState);
           }}
         />

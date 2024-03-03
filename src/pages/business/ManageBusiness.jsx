@@ -4,6 +4,7 @@ import React, {
   useContext,
   useEffect,
   Fragment,
+  useRef,
 } from "react";
 import {
   useNavigate,
@@ -25,7 +26,7 @@ import Accordion from "react-bootstrap/Accordion";
 import BookingCard from "../../components/BookingCard";
 import { Formik, Form, Field } from "formik";
 import {
-  Editor,
+  // Editor,
   EditorState,
   RichUtils,
   convertFromRaw,
@@ -33,6 +34,8 @@ import {
   ContentState,
 } from "draft-js";
 import DraftEditor from "../../components/editor/DraftEditor";
+import tinymce, { Editor } from "@tinymce/tinymce-react";
+import parse from "html-react-parser";
 
 function ManageBusiness() {
   const { loggedInUser } = useContext(AuthContext);
@@ -50,12 +53,13 @@ function ManageBusiness() {
   const [approvals, setApprovals] = useState([]);
   const [bookingRequests, setBookingRequests] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [status, setStatus] = useState(null);
 
   const [editingPaymentInstructions, setEditingPaymentInstructions] =
     useState(false);
   const [savingPaymentInstructions, setSavingPaymentInstructions] =
     useState(false);
-  const [paymentInstructions, setPaymentInstructions] = useState(null);
+  const [paymentInstructions, setPaymentInstructions] = useState("<p></p>");
 
   const defaultTab = "paymentInstructions"; // approvals?.length > 0 ? "clients" : "bookings";
 
@@ -64,19 +68,17 @@ function ManageBusiness() {
     apiGet("manage-business").then((response) => {
       setLoaded(true);
       if (response.status === 200) {
+        console.log(response.data);
         if (response.data) {
           setBusiness(response.data.business);
-          setEditorState(
-            EditorState.createWithContent(
-              ContentState.createFromText(
-                response.data.business?.paymentInstructions ?? ""
-              )
-            )
-          );
           setPaymentInstructions(response.data.business?.paymentInstructions);
-          setApprovals(
-            response.data.business.businessUsers.filter((bu) => !bu.confirmed)
+          editorRef.current?.setContent(
+            response.data.business?.paymentInstructions
           );
+          setApprovals(
+            response.data.business?.businessUsers?.filter((bu) => !bu.confirmed)
+          );
+          setStatus(response.data.status);
           setBookingRequests(response.data.bookingRequests);
         }
       } else {
@@ -174,7 +176,7 @@ function ManageBusiness() {
 
   const approveUsersElement = (
     <div className="standard-grid">
-      {approvals.map((bu) => (
+      {approvals?.map((bu) => (
         <div className="col" key={bu._id}>
           <Card>
             <Card.Body className="lead">
@@ -297,38 +299,88 @@ function ManageBusiness() {
         ))}
     </Row>
   );
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+
+  const editorRef = useRef(null);
+
+  const [dirty, setDirty] = useState(false);
+
+  useEffect(() => setDirty(false), [paymentInstructions]);
 
   const savePaymentInstructions = () => {
-    setSavingPaymentInstructions(true);
+    const content = editorRef.current.getContent();
+    if (content !== business.paymentInstructions)
+      setSavingPaymentInstructions(true);
     apiPost("manage-business/payment-instructions", {
-      paymentInstructions: editorState.getCurrentContent().getPlainText(),
+      paymentInstructions: content,
     }).then((response) => {
       setSavingPaymentInstructions(false);
       if (response.status === 200) {
         console.log(response.data);
+        setBusiness({
+          ...business,
+          paymentInstructions: content,
+        });
         setPaymentInstructions(response.data.paymentInstructions);
-        setEditorState(
-          EditorState.createWithContent(
-            ContentState.createFromText(response.data.paymentInstructions ?? "")
-          )
-        );
+        editorRef.current?.setContent(response.data.paymentInstructions);
       } else {
         // Failed
       }
       setEditingPaymentInstructions(false);
     });
   };
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+
+  const tinyMCEEditor = (
+    <Editor
+      tinymceScriptSrc={process.env.PUBLIC_URL + "/tinymce/tinymce.min.js"}
+      onInit={(evt, editor) => (editorRef.current = editor)}
+      initialValue={business?.paymentInstructions}
+      value={paymentInstructions}
+      onEditorChange={(newValue, editor) => setPaymentInstructions(newValue)}
+      init={{
+        selector: "#paymentInstructionsEditor",
+        skin: "oxide-dark",
+        content_css: "dark",
+        height: 300,
+        menubar: false,
+        plugins: [
+          "advlist",
+          "autolink",
+          "lists",
+          "link",
+          "charmap",
+          "anchor",
+          "searchreplace",
+          "table",
+          "preview",
+          "help",
+        ],
+        toolbar:
+          "undo redo | " +
+          "bold italic | bullist numlist | " +
+          "removeformat | help",
+        content_style:
+          "body { font-family:Montserrat,Arial,sans-serif; font-size:14px }",
+      }}
+    />
+  );
+
+  const htmlDecode = (input) => {
+    var e = document.createElement("div");
+    e.innerHTML = input;
+    return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
+  };
 
   const paymentInstructionsTab = (
     <Fragment>
       <div className="d-flex flex-column gap-3 align-items-start">
         {editingPaymentInstructions ? (
           <div className="w-100 d-flex flex-column gap-3 ">
-            <DraftEditor
+            {/* <DraftEditor
               editorState={editorState}
               setEditorState={setEditorState}
-            />
+            /> */}
+            {tinyMCEEditor}
             <div className="d-flex gap-3">
               <Button variant="success" onClick={savePaymentInstructions}>
                 Save Instructions
@@ -344,7 +396,7 @@ function ManageBusiness() {
         ) : (
           <div className="w-100 d-flex flex-column gap-3 align-items-start">
             {paymentInstructions ? (
-              <div className="showLineBreaks w-100">{paymentInstructions}</div>
+              parse(paymentInstructions)
             ) : (
               <div className="text-center w-100">
                 {
@@ -487,6 +539,19 @@ function ManageBusiness() {
             <hr />
             {servicesElement()} */}
           </Fragment>
+        ) : status === "PENDING" ? (
+          <div>
+            <h3 className="text-center">Your business is pending approval</h3>
+            <div className="d-flex justify-content-center m-3">
+              <Link
+                to={{ pathname: "/new-business" }}
+                state={state}
+                className="btn btn-success"
+              >
+                Edit business details
+              </Link>
+            </div>
+          </div>
         ) : (
           <div>
             <h3 className="text-center">You don't currently have a business</h3>

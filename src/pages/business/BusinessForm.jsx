@@ -22,9 +22,9 @@ function BusinessForm() {
     apiGet("manage-business").then((response) => {
       setLoaded(true);
       if (response.status === 200) {
-        setBusiness(response.data);
+        setBusiness(response.data.business);
         setValues({
-          ...response.data,
+          ...response.data.business,
         });
       } else {
         navigate("/");
