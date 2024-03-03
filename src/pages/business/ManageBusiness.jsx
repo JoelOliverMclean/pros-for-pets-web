@@ -4,14 +4,8 @@ import React, {
   useContext,
   useEffect,
   Fragment,
-  useRef,
 } from "react";
-import {
-  useNavigate,
-  Link,
-  useLocation,
-  createSearchParams,
-} from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { apiGet, apiPost } from "../../helpers/NetworkHelper";
 import { AuthContext } from "../../helpers/AuthContext";
 import { ClipLoader } from "react-spinners";
@@ -24,18 +18,8 @@ import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import Accordion from "react-bootstrap/Accordion";
 import BookingCard from "../../components/BookingCard";
-import { Formik, Form, Field } from "formik";
-import {
-  // Editor,
-  EditorState,
-  RichUtils,
-  convertFromRaw,
-  convertToRaw,
-  ContentState,
-} from "draft-js";
-import DraftEditor from "../../components/editor/DraftEditor";
-import tinymce, { Editor } from "@tinymce/tinymce-react";
 import parse from "html-react-parser";
+import TinyMCEEditor from "../../components/editor/TinyMCEEditor";
 
 function ManageBusiness() {
   const { loggedInUser } = useContext(AuthContext);
@@ -72,9 +56,6 @@ function ManageBusiness() {
         if (response.data) {
           setBusiness(response.data.business);
           setPaymentInstructions(response.data.business?.paymentInstructions);
-          editorRef.current?.setContent(
-            response.data.business?.paymentInstructions
-          );
           setApprovals(
             response.data.business?.businessUsers?.filter((bu) => !bu.confirmed)
           );
@@ -299,76 +280,27 @@ function ManageBusiness() {
         ))}
     </Row>
   );
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
-
-  const editorRef = useRef(null);
-
-  const [dirty, setDirty] = useState(false);
-
-  useEffect(() => setDirty(false), [paymentInstructions]);
 
   const savePaymentInstructions = () => {
-    const content = editorRef.current.getContent();
-    if (content !== business.paymentInstructions)
+    const content = paymentInstructions;
+    if (content !== business.paymentInstructions) {
       setSavingPaymentInstructions(true);
-    apiPost("manage-business/payment-instructions", {
-      paymentInstructions: content,
-    }).then((response) => {
-      setSavingPaymentInstructions(false);
-      if (response.status === 200) {
-        console.log(response.data);
-        setBusiness({
-          ...business,
-          paymentInstructions: content,
-        });
-        setPaymentInstructions(response.data.paymentInstructions);
-        editorRef.current?.setContent(response.data.paymentInstructions);
-      } else {
-        // Failed
-      }
-      setEditingPaymentInstructions(false);
-    });
-  };
-
-  const tinyMCEEditor = (
-    <Editor
-      tinymceScriptSrc={process.env.PUBLIC_URL + "/tinymce/tinymce.min.js"}
-      onInit={(evt, editor) => (editorRef.current = editor)}
-      initialValue={business?.paymentInstructions}
-      value={paymentInstructions}
-      onEditorChange={(newValue, editor) => setPaymentInstructions(newValue)}
-      init={{
-        selector: "#paymentInstructionsEditor",
-        skin: "oxide-dark",
-        content_css: "dark",
-        height: 300,
-        menubar: false,
-        plugins: [
-          "advlist",
-          "autolink",
-          "lists",
-          "link",
-          "charmap",
-          "anchor",
-          "searchreplace",
-          "table",
-          "preview",
-          "help",
-        ],
-        toolbar:
-          "undo redo | " +
-          "bold italic | bullist numlist | " +
-          "removeformat | help",
-        content_style:
-          "body { font-family:Montserrat,Arial,sans-serif; font-size:14px }",
-      }}
-    />
-  );
-
-  const htmlDecode = (input) => {
-    var e = document.createElement("div");
-    e.innerHTML = input;
-    return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
+      apiPost("manage-business/payment-instructions", {
+        paymentInstructions: content,
+      }).then((response) => {
+        setSavingPaymentInstructions(false);
+        if (response.status === 200) {
+          setBusiness({
+            ...business,
+            paymentInstructions: content,
+          });
+          setPaymentInstructions(response.data.paymentInstructions);
+        } else {
+          // Failed
+        }
+        setEditingPaymentInstructions(false);
+      });
+    }
   };
 
   const paymentInstructionsTab = (
@@ -376,13 +308,18 @@ function ManageBusiness() {
       <div className="d-flex flex-column gap-3 align-items-start">
         {editingPaymentInstructions ? (
           <div className="w-100 d-flex flex-column gap-3 ">
-            {/* <DraftEditor
-              editorState={editorState}
-              setEditorState={setEditorState}
-            /> */}
-            {tinyMCEEditor}
+            <TinyMCEEditor
+              initialValue={business?.paymentInstructions}
+              value={paymentInstructions}
+              setValue={setPaymentInstructions}
+              id="paymentInstructionsEditor"
+            />
             <div className="d-flex gap-3">
-              <Button variant="success" onClick={savePaymentInstructions}>
+              <Button
+                variant="success"
+                disabled={savingPaymentInstructions}
+                onClick={savePaymentInstructions}
+              >
                 Save Instructions
               </Button>
               <Button
