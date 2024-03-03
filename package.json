@@ -44,7 +44,7 @@
     "eject": "react-scripts eject",
     "postinstall": "node ./postinstall.js",
     "sass": "sass --watch src/assets/scss:src/assets/css --style compressed",
-    "start:dev": "env-cmd -f dev.env npm start",
+    "dev": "env-cmd -f dev.env npm start",
     "build:beta": "env-cmd -f stag.env npm run build"
   },
   "eslintConfig": {
