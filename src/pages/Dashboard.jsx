@@ -92,7 +92,7 @@ function Dashboard() {
         </Row>
       ) : (
         <div className="lead text-subtle text-center">
-          No upcoming bookings.
+          No outstanding payments.
         </div>
       )}
     </Fragment>
