@@ -15,6 +15,9 @@ import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import AppRoutes from "./components/AppRoutes";
 
+import useBreakpoint from "use-breakpoint";
+import UIUtils from "./helpers/UIUtils";
+
 function App() {
   const [showCookie, setShowCookie] = useState(
     getCookieConsentValue("acceptPros4PetsCookies") === undefined
@@ -27,6 +30,8 @@ function App() {
       event.preventDefault();
     }
   });
+
+  const { breakpoint, maxWidth, minWidth } = useBreakpoint(UIUtils.BREAKPOINTS);
 
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [checkingUser, setCheckingUser] = useState(loggedInUser === null);
@@ -50,7 +55,9 @@ function App() {
   return (
     <div className="App p-0">
       {!checkingUser && (
-        <AuthContext.Provider value={{ loggedInUser, setLoggedInUser }}>
+        <AuthContext.Provider
+          value={{ loggedInUser, setLoggedInUser, breakpoint }}
+        >
           <Router>
             <Navigation />
             <div className="container pageContainer">
