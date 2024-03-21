@@ -9,6 +9,7 @@ function BookingCard({
   reviewRequest,
   showBusiness,
   manageBookingSlot,
+  pressedPay,
 }) {
   const { loggedInUser } = useContext(AuthContext);
   return (
@@ -79,6 +80,7 @@ function BookingCard({
                     ? "btn-secondary disabled"
                     : "btn-success disabled"
                 } flex-fill`}
+                onClick={() => pressedPay(booking)}
               >
                 {booking.payment === "OUTSTANDING"
                   ? `Pay £${(booking.cost / 100).toFixed(2)}`

@@ -12,6 +12,7 @@ import BookingCard from "../components/BookingCard";
 import moment from "moment";
 import BookingSlotCard from "../components/BookingSlotCard";
 import UIUtils from "../helpers/UIUtils";
+import PaymentModal from "../components/modals/PaymentModal";
 
 function Dashboard() {
   const { loggedInUser, breakpoint } = useContext(AuthContext);
@@ -27,6 +28,9 @@ function Dashboard() {
   const [businessUsers, setBusinessUsers] = useState([]);
   const [upcomingBookings, setUpcomingBookings] = useState([]);
   const [outstandingPayments, setOutstandingPayments] = useState([]);
+
+  const [bookingToPay, setBookingToPay] = useState(null);
+  const [showPaymentModel, setShowPaymentModal] = useState(false);
 
   const getSectionColClass = (list) => {
     if (list?.length < 3) {
@@ -78,8 +82,6 @@ function Dashboard() {
     getOutstandingPayments();
   }, [getOutstandingPayments]);
 
-  console.log(breakpoint);
-
   const gridSection = (isLoading, list, bodyContent, noResultsText) =>
     isLoading ? (
       <div className="d-flex pt-2">
@@ -90,6 +92,11 @@ function Dashboard() {
     ) : (
       <div className="lead text-subtle text-center p-2">{noResultsText}</div>
     );
+
+  const pressedPay = (booking) => {
+    setBookingToPay(booking);
+    setShowPaymentModal(true);
+  };
 
   const outstandingPaymentsSection = (
     <Col className={`col-12 ${getSectionColClass(outstandingPayments)} p-2`}>
@@ -105,7 +112,11 @@ function Dashboard() {
               .slice(0, getMaxDisplayCount())
               .map((booking) => (
                 <div key={booking._id} className="col">
-                  <BookingCard booking={booking} mine={true} />
+                  <BookingCard
+                    booking={booking}
+                    mine={true}
+                    pressedPay={pressedPay}
+                  />
                 </div>
               )),
             "No outstanding payments."
@@ -272,6 +283,12 @@ function Dashboard() {
         {outstandingPayments?.length > 0 && outstandingPaymentsSection}
         {upcomingBookingsSection}
         {prosSection}
+        <PaymentModal
+          bookingToPay={bookingToPay}
+          setBookingToPay={setBookingToPay}
+          show={showPaymentModel}
+          setShow={setShowPaymentModal}
+        />
       </Row>
     </Container>
   );
