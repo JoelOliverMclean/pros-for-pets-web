@@ -227,12 +227,7 @@ function Dashboard() {
     }).then((response) => {
       setLoadingUpcomingBookings(false);
       if (response.status === 200) {
-        setUpcomingBookings([
-          ...response.data.bookingSlots,
-          ...response.data.bookingSlots,
-          ...response.data.bookingSlots,
-          ...response.data.bookingSlots,
-        ]);
+        setUpcomingBookings([...response.data.bookingSlots]);
       } else {
         navigate("/");
       }
