@@ -61,7 +61,7 @@ function Dashboard() {
   const getOutstandingPayments = useCallback(() => {
     setLoadingOutstandingPayments(true);
     apiGet("bookings", {
-      tense: "BOTH",
+      tense: "PAST",
       pageSize: 4,
       page: 0,
       payment: "OUTSTANDING",
