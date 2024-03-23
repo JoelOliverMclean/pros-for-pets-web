@@ -219,7 +219,7 @@ function Business() {
           <div className="standard-grid">
             {business.services.map((service) => (
               <div className="col" key={service._id}>
-                <Card>
+                <Card className="h-100">
                   <Card.Header className="lead">{service.name}</Card.Header>
                   <Card.Body>{service.description}</Card.Body>
                 </Card>

@@ -10,7 +10,6 @@ import { apiGet, apiPost } from "../../helpers/NetworkHelper";
 import { AuthContext } from "../../helpers/AuthContext";
 import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify";
-import Card from "react-bootstrap/Card";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import Row from "react-bootstrap/Row";
@@ -20,6 +19,9 @@ import Accordion from "react-bootstrap/Accordion";
 import BookingCard from "../../components/BookingCard";
 import parse from "html-react-parser";
 import TinyMCEEditor from "../../components/editor/TinyMCEEditor";
+import _ApproveUsers from "./manage_business/_ApproveUsers";
+import _Services from "./manage_business/_Services";
+import _BookingRequests from "./manage_business/_BookingRequests";
 
 function ManageBusiness() {
   const { loggedInUser } = useContext(AuthContext);
@@ -45,14 +47,13 @@ function ManageBusiness() {
     useState(false);
   const [paymentInstructions, setPaymentInstructions] = useState("<p></p>");
 
-  const defaultTab = "paymentInstructions"; // approvals?.length > 0 ? "clients" : "bookings";
+  const defaultTab = approvals?.length > 0 ? "clients" : "bookings";
 
   const getBusiness = useCallback(() => {
     setLoaded(false);
     apiGet("manage-business").then((response) => {
       setLoaded(true);
       if (response.status === 200) {
-        console.log(response.data);
         if (response.data) {
           setBusiness(response.data.business);
           setPaymentInstructions(response.data.business?.paymentInstructions);
@@ -143,144 +144,6 @@ function ManageBusiness() {
     );
   };
 
-  const approveUser = (bu, approved) => {
-    apiPost(`/manage-business/review-user/${bu._id}`, { approved }).then(
-      (response) => {
-        if (response.status === 200) {
-          let newApprovals = [...approvals];
-          newApprovals.splice(newApprovals.indexOf(bu));
-          setApprovals([...newApprovals]);
-        }
-      }
-    );
-  };
-
-  const approveUsersElement = (
-    <div className="standard-grid">
-      {approvals?.map((bu) => (
-        <div className="col" key={bu._id}>
-          <Card>
-            <Card.Body className="lead">
-              {bu.user.firstname} {bu.user.lastname}
-              <br />
-              <span className="small text-subtle">@{bu.user.username}</span>
-            </Card.Body>
-            <Card.Footer className="p-2">
-              <div className="d-flex gap-2">
-                <button
-                  className="form-control btn btn-success"
-                  onClick={() => approveUser(bu, true)}
-                >
-                  Approve
-                </button>
-                <button
-                  className="form-control btn btn-outline-danger"
-                  onClick={() => approveUser(bu, false)}
-                >
-                  Deny
-                </button>
-              </div>
-            </Card.Footer>
-          </Card>
-        </div>
-      ))}
-    </div>
-  );
-
-  const servicesElement = (
-    <Fragment>
-      <div className="d-flex align-items-center mb-3">
-        {business?.services && business?.services.length > 0 && (
-          <Link
-            to={{ pathname: "/manage-business/new-service" }}
-            state={state}
-            className="btn btn-outline-mids-mutts ms-auto"
-          >
-            Add New&nbsp;&nbsp;<i className="fa-solid fa-plus"></i>
-          </Link>
-        )}
-      </div>
-      {business?.services?.length > 0 ? (
-        <div className="standard-grid">
-          {business.services.map((service) => (
-            <div className="col" key={service._id}>
-              <Card>
-                <Card.Header className="lead">{service.name}</Card.Header>
-                <Card.Body>{service.description}</Card.Body>
-                <Card.Footer className="p-2">
-                  <Link
-                    to={{
-                      pathname: `/manage-business/edit-service/${service.slug}`,
-                    }}
-                    state={state}
-                    className="form-control btn btn-outline-mids-mutts"
-                  >
-                    Edit
-                  </Link>
-                </Card.Footer>
-              </Card>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center text-subtle display-8">
-          <p className="text-center">No services</p>
-          <Link
-            to={{ pathname: "/manage-business/new-service" }}
-            state={state}
-            className="btn btn-mids-mutts ms-auto"
-          >
-            Create first service
-          </Link>
-        </div>
-      )}
-    </Fragment>
-  );
-
-  const reviewRequest = useCallback(
-    (request, accepted) => {
-      apiPost("manage-booking-slots/review-request", {
-        booking_id: request._id,
-        accepted,
-      }).then((response) => {
-        if (response.status === 200) {
-          setBookingRequests({
-            ...bookingRequests.filter((br) => br === request),
-          });
-          toast.success(`Request ${accepted ? "accepted" : "rejected"}`, {
-            theme: "dark",
-            position: "top-center",
-            autoClose: 1000,
-            pauseOnFocusLoss: false,
-          });
-        } else {
-          toast.error(`Something went wrong`, {
-            theme: "dark",
-            position: "top-center",
-            autoClose: 1000,
-            pauseOnFocusLoss: false,
-          });
-        }
-      });
-    },
-    [bookingRequests]
-  );
-
-  const bookingRequestTab = (
-    <Row className="standard-grid">
-      {bookingRequests.length > 0 &&
-        bookingRequests.map((br) => (
-          <Col key={br._id}>
-            <BookingCard
-              booking={br}
-              mine={false}
-              reviewRequest={reviewRequest}
-            />
-          </Col>
-        ))}
-    </Row>
-  );
-
   const savePaymentInstructions = () => {
     const content = paymentInstructions;
     if (content !== business.paymentInstructions) {
@@ -363,12 +226,17 @@ function ManageBusiness() {
   );
 
   const clientTab = (
-    <Fragment>
-      {approvals?.length > 0 && <Fragment>{approveUsersElement}</Fragment>}
-    </Fragment>
+    <Fragment>{approvals?.length > 0 && <_ApproveUsers />}</Fragment>
   );
 
-  const servicesTab = <Fragment>{servicesElement}</Fragment>;
+  const bookingRequestsTab = (
+    <_BookingRequests
+      bookingRequests={bookingRequests}
+      setBookingRequests={setBookingRequests}
+    />
+  );
+
+  const servicesTab = <_Services business={business} state={state} />;
 
   const clientsTabTitle = (
     <div className="d-flex">
@@ -403,7 +271,7 @@ function ManageBusiness() {
       )}
       <Tab eventKey="bookings" title={bookingRequestsTabTitle}>
         <div className="border-start border-end border-bottom border-1 rounded-bottom-3 p-3 bg-fore">
-          {bookingRequestTab}
+          {bookingRequestsTab}
         </div>
       </Tab>
       <Tab eventKey="services" title="Services">
@@ -429,7 +297,7 @@ function ManageBusiness() {
       )}
       <Accordion.Item eventKey="bookings">
         <Accordion.Header>{bookingRequestsTabTitle}</Accordion.Header>
-        <Accordion.Body>{bookingRequestTab}</Accordion.Body>
+        <Accordion.Body>{bookingRequestsTab}</Accordion.Body>
       </Accordion.Item>
       <Accordion.Item eventKey="services">
         <Accordion.Header>Services</Accordion.Header>
