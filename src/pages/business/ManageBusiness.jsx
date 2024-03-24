@@ -6,28 +6,22 @@ import React, {
   Fragment,
 } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { apiGet, apiPost } from "../../helpers/NetworkHelper";
+import { apiGet } from "../../helpers/NetworkHelper";
 import { AuthContext } from "../../helpers/AuthContext";
 import { ClipLoader } from "react-spinners";
-import { toast } from "react-toastify";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Button from "react-bootstrap/Button";
 import Accordion from "react-bootstrap/Accordion";
-import BookingCard from "../../components/BookingCard";
-import parse from "html-react-parser";
-import TinyMCEEditor from "../../components/editor/TinyMCEEditor";
 import _ApproveUsers from "./manage_business/_ApproveUsers";
 import _Services from "./manage_business/_Services";
 import _BookingRequests from "./manage_business/_BookingRequests";
+import _PaymentInstructions from "./manage_business/_PaymentInstructions";
+import Page from "../../components/Page";
 
 function ManageBusiness() {
   const { loggedInUser } = useContext(AuthContext);
 
   const navigate = useNavigate();
-  const location = useLocation();
 
   if (!loggedInUser) {
     navigate("/");
@@ -40,19 +34,13 @@ function ManageBusiness() {
   const [bookingRequests, setBookingRequests] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [status, setStatus] = useState(null);
-
-  const [editingPaymentInstructions, setEditingPaymentInstructions] =
-    useState(false);
-  const [savingPaymentInstructions, setSavingPaymentInstructions] =
-    useState(false);
   const [paymentInstructions, setPaymentInstructions] = useState("<p></p>");
-
-  const defaultTab = approvals?.length > 0 ? "clients" : "bookings";
 
   const getBusiness = useCallback(() => {
     setLoaded(false);
     apiGet("manage-business").then((response) => {
       setLoaded(true);
+      console.log(response.data);
       if (response.status === 200) {
         if (response.data) {
           setBusiness(response.data.business);
@@ -144,101 +132,18 @@ function ManageBusiness() {
     );
   };
 
-  const savePaymentInstructions = () => {
-    const content = paymentInstructions;
-    if (content !== business.paymentInstructions) {
-      setSavingPaymentInstructions(true);
-      apiPost("manage-business/payment-instructions", {
-        paymentInstructions: content,
-      }).then((response) => {
-        setSavingPaymentInstructions(false);
-        if (response.status === 200) {
-          setBusiness({
-            ...business,
-            paymentInstructions: content,
-          });
-          setPaymentInstructions(response.data.paymentInstructions);
-        } else {
-          // Failed
-        }
-        setEditingPaymentInstructions(false);
-      });
-    }
-  };
-
-  const paymentInstructionsTab = (
-    <Fragment>
-      <div className="d-flex flex-column gap-3 align-items-start">
-        {editingPaymentInstructions ? (
-          <div className="w-100 d-flex flex-column gap-3 ">
-            <TinyMCEEditor
-              initialValue={business?.paymentInstructions}
-              value={paymentInstructions}
-              setValue={setPaymentInstructions}
-              id="paymentInstructionsEditor"
-            />
-            <div className="d-flex gap-3">
-              <Button
-                variant="success"
-                disabled={savingPaymentInstructions}
-                onClick={savePaymentInstructions}
-              >
-                Save Instructions
-              </Button>
-              <Button
-                variant="outline-light"
-                onClick={() => setEditingPaymentInstructions(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="w-100 d-flex flex-column gap-3 align-items-start">
-            {paymentInstructions ? (
-              parse(paymentInstructions)
-            ) : (
-              <div className="text-center w-100">
-                {
-                  "To make payments quicker and easier for your clients, you can add payment instructions which will show for them whenever they click "
-                }
-                <Button variant="success" className="btn-sm">
-                  Pay
-                </Button>
-                {" on a booking on this site"}
-              </div>
-            )}
-
-            <Button
-              variant="success"
-              className={`${!paymentInstructions && "align-self-center"}`}
-              onClick={() =>
-                setEditingPaymentInstructions(!editingPaymentInstructions)
-              }
-            >
-              {paymentInstructions ? "Edit" : "Add"}
-              {" Payment Instructions"}
-            </Button>
-          </div>
-        )}
-      </div>
-    </Fragment>
-  );
-
-  const clientTab = (
-    <Fragment>{approvals?.length > 0 && <_ApproveUsers />}</Fragment>
-  );
-
-  const bookingRequestsTab = (
-    <_BookingRequests
-      bookingRequests={bookingRequests}
-      setBookingRequests={setBookingRequests}
+  const paymentInstructionsKey = "paymentInstructions";
+  const paymentInstructionsTitle = "Payment Instructions";
+  const paymentInstructionsSection = (
+    <_PaymentInstructions
+      business={business}
+      paymentInstructions={paymentInstructions}
+      setPaymentInstructions={setPaymentInstructions}
     />
   );
 
-  const servicesTab = <_Services business={business} state={state} />;
-
-  const clientsTabTitle = (
+  const clientsKey = "clientRequests";
+  const clientsTitle = (
     <div className="d-flex">
       Applications
       {approvals?.length > 0 && (
@@ -248,8 +153,12 @@ function ManageBusiness() {
       )}
     </div>
   );
+  const clientSection = (
+    <_ApproveUsers approvals={approvals} setApprovals={setApprovals} />
+  );
 
-  const bookingRequestsTabTitle = (
+  const bookingRequestsKey = "bookingRequests";
+  const bookingRequestsTitle = (
     <div className="d-flex">
       Booking Requests
       {bookingRequests?.length > 0 && (
@@ -259,120 +168,122 @@ function ManageBusiness() {
       )}
     </div>
   );
+  const bookingRequestsSection = (
+    <_BookingRequests
+      bookingRequests={bookingRequests}
+      setBookingRequests={setBookingRequests}
+    />
+  );
 
-  const tabbedElement = (
-    <Tabs defaultActiveKey={defaultTab} className="mt-3">
-      {approvals?.length > 0 && (
-        <Tab eventKey="clients" title={clientsTabTitle}>
-          <div className="border-start border-end border-bottom border-1 rounded-bottom-3 p-3 bg-fore">
-            {clientTab}
-          </div>
-        </Tab>
+  const servicesKey = "services";
+  const servicesTitle = "Services";
+  const servicesSection = <_Services business={business} state={state} />;
+
+  const tab = (key, title, section) => (
+    <Tab eventKey={key} title={title}>
+      <div className="border-start border-end border-bottom border-1 rounded-bottom-3 p-3 bg-fore">
+        {section}
+      </div>
+    </Tab>
+  );
+
+  const lastTabOpen = sessionStorage.getItem("manageBusinessOpenedTab");
+
+  const tabbedElement = () => (
+    <Tabs
+      defaultActiveKey={
+        lastTabOpen ?? (approvals?.length > 0 ? clientsKey : bookingRequestsKey)
+      }
+      className="mt-3"
+      onSelect={(key, event) => {
+        console.log(key);
+        sessionStorage.setItem("manageBusinessOpenedTab", key);
+      }}
+    >
+      {approvals?.length > 0 && tab(clientsKey, clientsTitle, clientSection)}
+      {tab(bookingRequestsKey, bookingRequestsTitle, bookingRequestsSection)}
+      {tab(servicesKey, servicesTitle, servicesSection)}
+      {tab(
+        paymentInstructionsKey,
+        paymentInstructionsTitle,
+        paymentInstructionsSection
       )}
-      <Tab eventKey="bookings" title={bookingRequestsTabTitle}>
-        <div className="border-start border-end border-bottom border-1 rounded-bottom-3 p-3 bg-fore">
-          {bookingRequestsTab}
-        </div>
-      </Tab>
-      <Tab eventKey="services" title="Services">
-        <div className="border-start border-end border-bottom border-1 rounded-bottom-3 p-3 bg-fore">
-          {servicesTab}
-        </div>
-      </Tab>
-      <Tab eventKey="paymentInstructions" title="Payment Instructions">
-        <div className="border-start border-end border-bottom border-1 rounded-bottom-3 p-3 bg-fore">
-          {paymentInstructionsTab}
-        </div>
-      </Tab>
     </Tabs>
   );
 
-  const accordionElement = (
+  const accordionItem = (key, title, section) => (
+    <Accordion.Item eventKey={key}>
+      <Accordion.Header>{title}</Accordion.Header>
+      <Accordion.Body>{section}</Accordion.Body>
+    </Accordion.Item>
+  );
+
+  const accordionElement = () => (
     <Accordion className="mt-3">
-      {approvals?.length > 0 && (
-        <Accordion.Item eventKey="clients">
-          <Accordion.Header>{clientsTabTitle}</Accordion.Header>
-          <Accordion.Body>{clientTab}</Accordion.Body>
-        </Accordion.Item>
+      {approvals?.length > 0 &&
+        accordionItem(clientsKey, clientsTitle, clientSection)}
+      {accordionItem(
+        bookingRequestsKey,
+        bookingRequestsTitle,
+        bookingRequestsSection
       )}
-      <Accordion.Item eventKey="bookings">
-        <Accordion.Header>{bookingRequestsTabTitle}</Accordion.Header>
-        <Accordion.Body>{bookingRequestsTab}</Accordion.Body>
-      </Accordion.Item>
-      <Accordion.Item eventKey="services">
-        <Accordion.Header>Services</Accordion.Header>
-        <Accordion.Body>{servicesTab}</Accordion.Body>
-      </Accordion.Item>
-      <Accordion.Item eventKey="paymentInstructions">
-        <Accordion.Header>Payment Instructions</Accordion.Header>
-        <Accordion.Body>{paymentInstructionsTab}</Accordion.Body>
-      </Accordion.Item>
+      {accordionItem(servicesKey, servicesTitle, servicesSection)}
+      {accordionItem(
+        paymentInstructionsKey,
+        paymentInstructionsTitle,
+        paymentInstructionsSection
+      )}
     </Accordion>
   );
 
-  return (
-    <React.Fragment>
-      <div>
-        {location?.state?.from?.title && (
-          <div className="col-lg-8 col-12">
-            <button
-              className="btn btn-sm btn-link"
-              onClick={() => navigate(-1)}
-            >
-              <i className="fa-solid fa-arrow-left pe-2"></i>
-              {location?.state?.from?.title}
-            </button>
-          </div>
-        )}
-        {!loaded ? (
-          <div className="d-flex pt-2">
-            <ClipLoader className="mx-auto" color="#0082b4" />
-          </div>
-        ) : business ? (
-          <Fragment>
-            {headerElement()}
-            <div className="d-none d-md-block">{tabbedElement}</div>
-            <div className="d-md-none d-block">{accordionElement}</div>
-            {/* {bookingRequestsElement}
-            {approvals.length > 0 && (
-              <Fragment>
-                <hr />
-                <h2 className="mb-3">Client Applications</h2>
-                {approveUsersElement()}
-              </Fragment>
-            )}
-            <hr />
-            {servicesElement()} */}
-          </Fragment>
-        ) : status === "PENDING" ? (
-          <div>
-            <h3 className="text-center">Your business is pending approval</h3>
-            <div className="d-flex justify-content-center m-3">
-              <Link
-                to={{ pathname: "/new-business" }}
-                state={state}
-                className="btn btn-success"
-              >
-                Edit business details
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <h3 className="text-center">You don't currently have a business</h3>
-            <div className="d-flex justify-content-center m-3">
-              <Link
-                to={{ pathname: "/new-business" }}
-                state={state}
-                className="btn btn-mids-mutts"
-              >
-                Create my business
-              </Link>
-            </div>
-          </div>
-        )}
+  const businessPendingView = (
+    <div>
+      <h3 className="text-center">Your business is pending approval</h3>
+      <div className="d-flex justify-content-center m-3">
+        <Link
+          to={{ pathname: "/new-business" }}
+          state={state}
+          className="btn btn-success"
+        >
+          Edit business details
+        </Link>
       </div>
-    </React.Fragment>
+    </div>
+  );
+
+  const noBusinessView = (
+    <div>
+      <h3 className="text-center">You don't currently have a business</h3>
+      <div className="d-flex justify-content-center m-3">
+        <Link
+          to={{ pathname: "/new-business" }}
+          state={state}
+          className="btn btn-mids-mutts"
+        >
+          Create my business
+        </Link>
+      </div>
+    </div>
+  );
+
+  return (
+    <Page>
+      {!loaded ? (
+        <div className="d-flex pt-2">
+          <ClipLoader className="mx-auto" color="#0082b4" />
+        </div>
+      ) : business ? (
+        <Fragment>
+          {headerElement()}
+          <div className="d-none d-md-block">{tabbedElement()}</div>
+          <div className="d-md-none d-block">{accordionElement()}</div>
+        </Fragment>
+      ) : status === "PENDING" ? (
+        { businessPendingView }
+      ) : (
+        { noBusinessView }
+      )}
+    </Page>
   );
 }
 

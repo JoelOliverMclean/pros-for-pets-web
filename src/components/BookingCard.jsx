@@ -18,12 +18,21 @@ function BookingCard({
         <div className="lead">{booking.bookingSlot.service.name}</div>
       </Card.Header>
       <Card.Body className="d-flex flex-column gap-2">
-        <div className="mt-0">
-          with <b>{booking?.business?.name}</b>
-        </div>
+        {mine && (
+          <div className="mt-0">
+            with <b>{booking?.business?.name}</b>
+          </div>
+        )}
+        {!mine && (
+          <div>
+            <i className="fa-solid fa-user"></i>
+            {"  "}
+            {booking.businessUserPet.pet.owner.firstname}
+          </div>
+        )}
         <div>
           <i className="fa-solid fa-paw"></i>
-          {"  Pet: "}
+          {"  "}
           {booking.businessUserPet.pet.name}
         </div>
         <div>
@@ -101,8 +110,16 @@ function BookingCard({
               </button>
             ) : (
               <Fragment>
-                <button className="btn btn-success flex-fill">Accept</button>
-                <button className="btn btn-outline-danger flex-fill">
+                <button
+                  className="btn btn-success flex-fill"
+                  onClick={() => reviewRequest(booking, true)}
+                >
+                  Accept
+                </button>
+                <button
+                  className="btn btn-outline-danger flex-fill"
+                  onClick={() => reviewRequest(booking, false)}
+                >
                   Deny
                 </button>
               </Fragment>

@@ -4,8 +4,11 @@ import { toast } from "react-toastify";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import BookingCard from "../../../components/BookingCard";
+import { useNavigate } from "react-router-dom";
 
 export default function ({ bookingRequests, setBookingRequests }) {
+  const navigate = useNavigate();
+
   const reviewRequest = useCallback(
     (request, accepted) => {
       apiPost("manage-booking-slots/review-request", {
@@ -13,14 +16,14 @@ export default function ({ bookingRequests, setBookingRequests }) {
         accepted,
       }).then((response) => {
         if (response.status === 200) {
-          setBookingRequests({
-            ...bookingRequests.filter((br) => br === request),
-          });
           toast.success(`Request ${accepted ? "accepted" : "rejected"}`, {
             theme: "dark",
             position: "top-center",
             autoClose: 1000,
             pauseOnFocusLoss: false,
+            onClose: () => {
+              navigate(0);
+            },
           });
         } else {
           toast.error(`Something went wrong`, {
@@ -28,6 +31,9 @@ export default function ({ bookingRequests, setBookingRequests }) {
             position: "top-center",
             autoClose: 1000,
             pauseOnFocusLoss: false,
+            onClose: () => {
+              navigate(0);
+            },
           });
         }
       });
